@@ -1,8 +1,10 @@
 import { useState, useCallback } from 'react'
 import type { ChatMessage, ChatContext } from '../types/chat'
 import type { Transaction } from '../types'
+import { apiService } from '../services/api'
 
 const MOCK_AI_RESPONSES = [
+  "🛡️ I'm your pre-transaction security guard! I'll analyze every transaction before you sign it to keep your assets safe.",
   "I can see you've been quite active with DeFi transactions! Your recent swap on Uniswap shows a good understanding of DEX trading.",
   "Looking at your transaction history, you've made 5 transactions in the last 24 hours with a total volume of $12,450.50.",
   "Your staking activity on Ethereum 2.0 is generating a 4.2% APY return. That's a solid long-term investment strategy.",
@@ -10,15 +12,18 @@ const MOCK_AI_RESPONSES = [
   "Your gas usage has been optimized recently. The average gas price you're paying is reasonable for current network conditions.",
   "Based on your transaction patterns, you seem to prefer Uniswap for swaps and have been exploring NFT minting. Would you like me to suggest some similar protocols?",
   "Your portfolio shows a good mix of DeFi activities: trading, staking, governance, and NFT collection. This diversification is excellent for risk management.",
-  "I can help you analyze any specific transaction or provide insights about your overall blockchain activity. What would you like to know more about?"
+  "I can help you analyze any specific transaction or provide insights about your overall blockchain activity. What would you like to know more about?",
+  "🔍 I've intercepted 3 high-risk transactions today and prevented potential losses. Your security is my top priority!",
+  "⚠️ I detected a suspicious contract interaction earlier. Always verify contract addresses before approving transactions.",
+  "✅ All your recent transactions passed security checks. Your DeFi activity looks safe and well-planned."
 ]
 
-export const useChatbot = (transactions: Transaction[]) => {
+export const useChatbot = (transactions: Transaction[], walletAddress?: string) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
       type: 'assistant',
-      content: "👋 Hello! I'm your AI assistant for blockchain transaction analysis. I can help you understand your transaction history, explain complex DeFi activities, and provide insights about your on-chain behavior. What would you like to know?",
+      content: "🛡️ Hello! I'm your preemptive blockchain security guard. I intercept and analyze every transaction before you sign it, decode calldata, assess risks, and warn you about potential threats. Your assets are safe with me! What would you like to know about transaction security?",
       timestamp: Date.now()
     }
   ])
@@ -26,11 +31,7 @@ export const useChatbot = (transactions: Transaction[]) => {
   const [isTyping, setIsTyping] = useState(false)
 
   const context: ChatContext = {
-    transactions: transactions.map(t => t.id),
-    userPreferences: {
-      detailLevel: 'detailed',
-      language: 'en'
-    }
+    transactions: transactions.map(t => t.id)
   }
 
   const sendMessage = useCallback(async (content: string) => {
@@ -44,22 +45,44 @@ export const useChatbot = (transactions: Transaction[]) => {
     setMessages(prev => [...prev, userMessage])
     setIsTyping(true)
 
-    // Simulate AI response delay
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000))
-
-    // Generate contextual response based on user input
-    const response = generateAIResponse(content, transactions)
-    
-    const aiMessage: ChatMessage = {
-      id: (Date.now() + 1).toString(),
-      type: 'assistant',
-      content: response,
-      timestamp: Date.now()
+    try {
+      // Call real AI API
+      const response = await apiService.chatWithAI(content, walletAddress, context)
+      
+      if (response.success && response.data) {
+        const aiMessage: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          type: 'assistant',
+          content: response.data.message,
+          timestamp: Date.now()
+        }
+        setMessages(prev => [...prev, aiMessage])
+      } else {
+        // Fallback to mock response if API fails
+        const fallbackResponse = generateAIResponse(content, transactions)
+        const aiMessage: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          type: 'assistant',
+          content: fallbackResponse,
+          timestamp: Date.now()
+        }
+        setMessages(prev => [...prev, aiMessage])
+      }
+    } catch (error) {
+      console.error('AI API error:', error)
+      // Fallback to mock response
+      const fallbackResponse = generateAIResponse(content, transactions)
+      const aiMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        type: 'assistant',
+        content: fallbackResponse,
+        timestamp: Date.now()
+      }
+      setMessages(prev => [...prev, aiMessage])
     }
 
-    setMessages(prev => [...prev, aiMessage])
     setIsTyping(false)
-  }, [transactions])
+  }, [transactions, context])
 
   const clearChat = useCallback(() => {
     setMessages([

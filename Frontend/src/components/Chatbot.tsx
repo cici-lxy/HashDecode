@@ -16,19 +16,21 @@ interface ChatbotProps {
   transactions: Transaction[]
   isOpen: boolean
   onToggle: () => void
+  walletAddress?: string
 }
 
 export const Chatbot: React.FC<ChatbotProps> = ({ 
   transactions, 
   isOpen, 
-  onToggle 
+  onToggle,
+  walletAddress
 }) => {
   const {
     messages,
     isTyping,
     sendMessage,
     clearChat
-  } = useChatbot(transactions)
+  } = useChatbot(transactions, walletAddress)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
 

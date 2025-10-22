@@ -45,10 +45,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   }, [message])
 
   const suggestedQuestions = [
-    "Analyze my transaction history",
-    "What's my gas usage like?",
-    "Explain my DeFi portfolio",
-    "How can I optimize my trading?"
+    "How does transaction interception work?",
+    "What risks should I watch for?",
+    "Explain my security settings",
+    "Show me recent blocked transactions"
   ]
 
   return (
@@ -81,7 +81,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder={isTyping ? "AI is typing..." : "Ask me anything about your transactions..."}
+              placeholder={isTyping ? "AI is typing..." : "Ask me about transaction security and analysis..."}
               disabled={disabled || isTyping}
               className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
               rows={1}
