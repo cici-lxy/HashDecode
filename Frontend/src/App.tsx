@@ -22,9 +22,12 @@ import '@rainbow-me/rainbowkit/styles.css'
 const chains = [mainnet, polygon, optimism, arbitrum] as const
 
 // Configure wallets
+const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || 'demo'
+console.log('🔑 WalletConnect Project ID:', projectId)
+
 const { connectors } = getDefaultWallets({
   appName: 'Blockscribe',
-  projectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || 'demo',
+  projectId: projectId,
 })
 
 // Create wagmi config

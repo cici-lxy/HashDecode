@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useAccount } from 'wagmi'
 import type { PendingTransaction, ContractInfo, TransactionWarning, RiskLevel } from '../types'
 import { PreTransactionModal } from './PreTransactionModal'
+import { apiService, type SecurityAnalysis } from '../services/api'
 
 interface TransactionInterceptorProps {
   children: React.ReactNode
@@ -13,103 +14,103 @@ export const TransactionInterceptor: React.FC<TransactionInterceptorProps> = ({ 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
 
-  // Mock function to analyze transaction - in real implementation, this would call your backend
+  // Real API function to analyze transaction
   const analyzeTransaction = useCallback(async (txData: any): Promise<PendingTransaction> => {
     setIsAnalyzing(true)
     
-    // Simulate analysis delay
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    // Mock analysis results
-    const mockAnalysis: PendingTransaction = {
-      id: `pending_${Date.now()}`,
-      to: txData.to || '0x0000000000000000000000000000000000000000',
-      data: txData.data || '0x',
-      value: txData.value || '0',
-      gasLimit: txData.gasLimit || '21000',
-      gasPrice: txData.gasPrice,
-      functionSignature: 'transfer(address,uint256)',
-      decodedParams: [
-        {
-          name: 'to',
-          type: 'address',
-          value: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
-          description: 'Recipient address'
-        },
-        {
-          name: 'amount',
-          type: 'uint256',
-          value: '1000000000000000000',
-          description: 'Amount to transfer (1 ETH)'
+    try {
+      console.log('🔍 Analyzing transaction with real API:', txData)
+      // Call the real backend API
+      const response = await apiService.analyzeTransaction({
+        to: txData.to || '0x0000000000000000000000000000000000000000',
+        data: txData.data || '0x',
+        value: txData.value || '0x0',
+        from: txData.from
+      })
+      
+      console.log('📡 API Response:', response)
+
+      if (response.success && response.data) {
+        const analysis: SecurityAnalysis = response.data
+        
+        // Map backend response to PendingTransaction type
+        const pendingTransaction: PendingTransaction = {
+          id: `pending_${Date.now()}`,
+          to: txData.to || '0x0000000000000000000000000000000000000000',
+          data: txData.data || '0x',
+          value: txData.value || '0',
+          gasLimit: txData.gasLimit || analysis.decoded.gasEstimate.toString(),
+          gasPrice: txData.gasPrice,
+          functionSignature: analysis.decoded.functionName,
+          decodedParams: [], // Would need to decode from calldata
+          riskLevel: analysis.risk.level as RiskLevel,
+          explanation: analysis.decoded.explanation,
+          warnings: analysis.decoded.warnings.map((warning, index) => ({
+            type: 'security' as const,
+            severity: analysis.risk.level as 'low' | 'medium' | 'high' | 'critical',
+            message: warning,
+            recommendation: analysis.risk.recommendations[index] || ''
+          })),
+          contractInfo: {
+            address: txData.to,
+            name: analysis.contract.name,
+            verified: analysis.contract.verified,
+            reputation: analysis.contract.reputation > 80 ? 'trusted' : 
+                       analysis.contract.reputation > 60 ? 'neutral' : 'risky',
+            category: analysis.contract.category as 'defi' | 'nft' | 'governance' | 'staking' | 'other',
+            riskFactors: [],
+            description: `${analysis.contract.name} (${analysis.contract.category})`
+          },
+          timestamp: Date.now(),
+          status: 'pending'
         }
-      ],
-      riskLevel: determineRiskLevel(txData),
-      explanation: generateExplanation(txData),
-      warnings: generateWarnings(txData),
-      contractInfo: await getContractInfo(txData.to),
-      timestamp: Date.now(),
-      status: 'pending'
+        
+        setIsAnalyzing(false)
+        return pendingTransaction
+      } else {
+        throw new Error(response.error || 'Analysis failed')
+      }
+    } catch (error) {
+      console.error('❌ Transaction analysis failed:', error)
+      console.log('🔄 Falling back to mock analysis...')
+      
+      // Fallback to mock analysis if API fails
+      const mockAnalysis: PendingTransaction = {
+        id: `pending_${Date.now()}`,
+        to: txData.to || '0x0000000000000000000000000000000000000000',
+        data: txData.data || '0x',
+        value: txData.value || '0',
+        gasLimit: txData.gasLimit || '21000',
+        gasPrice: txData.gasPrice,
+        functionSignature: 'unknown',
+        decodedParams: [],
+        riskLevel: 'high',
+        explanation: 'Unable to analyze transaction. Please verify the contract address and function before proceeding.',
+        warnings: [{
+          type: 'security',
+          severity: 'high',
+          message: 'Analysis failed - using fallback',
+          recommendation: 'Verify the contract address on Etherscan before proceeding'
+        }],
+        contractInfo: {
+          address: txData.to,
+          name: 'Unknown Contract',
+          verified: false,
+          reputation: 'unknown',
+          category: 'other',
+          riskFactors: [],
+          description: 'Contract analysis unavailable'
+        },
+        timestamp: Date.now(),
+        status: 'pending'
+      }
+      
+      setIsAnalyzing(false)
+      return mockAnalysis
     }
-    
-    setIsAnalyzing(false)
-    return mockAnalysis
   }, [])
 
-  const determineRiskLevel = (txData: any): RiskLevel => {
-    const value = parseFloat(txData.value || '0') / 1e18
-    const isUnknownContract = !isKnownContract(txData.to)
-    
-    if (value > 10 || isUnknownContract) return 'high'
-    if (value > 1) return 'medium'
-    return 'low'
-  }
-
-  const generateExplanation = (txData: any): string => {
-    const value = parseFloat(txData.value || '0') / 1e18
-    const contractName = getContractName(txData.to)
-    
-    if (value > 0) {
-      return `You are about to send ${value.toFixed(4)} ETH to ${contractName}. This transaction will transfer your funds to the specified address.`
-    }
-    
-    return `You are about to interact with ${contractName}. This transaction will execute a smart contract function.`
-  }
-
-  const generateWarnings = (txData: any): TransactionWarning[] => {
-    const warnings: TransactionWarning[] = []
-    const value = parseFloat(txData.value || '0') / 1e18
-    const isUnknownContract = !isKnownContract(txData.to)
-    
-    if (value > 5) {
-      warnings.push({
-        type: 'high_value',
-        severity: 'high',
-        message: `High value transaction: ${value.toFixed(4)} ETH`,
-        recommendation: 'Double-check the recipient address and amount'
-      })
-    }
-    
-    if (isUnknownContract) {
-      warnings.push({
-        type: 'unknown_contract',
-        severity: 'medium',
-        message: 'Interacting with unknown contract',
-        recommendation: 'Verify the contract address and function before proceeding'
-      })
-    }
-    
-    if (parseInt(txData.gasLimit || '0') > 500000) {
-      warnings.push({
-        type: 'gas',
-        severity: 'low',
-        message: 'High gas limit detected',
-        recommendation: 'Consider if this gas limit is necessary'
-      })
-    }
-    
-    return warnings
-  }
-
+  // Helper functions for fallback analysis (kept for error handling)
   const getContractName = (address: string): string => {
     const knownContracts: Record<string, string> = {
       '0xA0b86a33E6441b8c4C8C0C4C0C4C0C4C0C4C0C4C': 'Uniswap V3 Router',
@@ -119,32 +120,16 @@ export const TransactionInterceptor: React.FC<TransactionInterceptorProps> = ({ 
     return knownContracts[address] || 'Unknown Contract'
   }
 
-  const isKnownContract = (address: string): boolean => {
-    const knownAddresses = [
-      '0xA0b86a33E6441b8c4C8C0C4C0C4C0C4C0C4C0C4C',
-      '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
-    ]
-    return knownAddresses.includes(address)
-  }
-
-  const getContractInfo = async (address: string): Promise<ContractInfo | undefined> => {
-    if (!isKnownContract(address)) return undefined
-    
-    return {
-      address,
-      name: getContractName(address),
-      verified: true,
-      reputation: 'trusted',
-      category: 'defi',
-      riskFactors: [],
-      description: 'Verified DeFi protocol'
-    }
-  }
-
   // Intercept wallet transaction requests
   useEffect(() => {
-    if (!isConnected || !address) return
+    console.log('🔌 TransactionInterceptor: isConnected =', isConnected, 'address =', address)
+    
+    if (!isConnected || !address) {
+      console.log('❌ TransactionInterceptor: Not connected, skipping setup')
+      return
+    }
 
+    console.log('✅ TransactionInterceptor: Setting up transaction interception')
     const originalSendTransaction = window.ethereum?.request
     
     if (window.ethereum && originalSendTransaction) {

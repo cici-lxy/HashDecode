@@ -52,6 +52,42 @@ interface ChatMessage {
   analysis?: any
 }
 
+interface SecurityAnalysis {
+  transaction: {
+    to: string
+    value: string
+    data: string
+  }
+  decoded: {
+    functionName: string
+    protocol: string
+    explanation: string
+    warnings: string[]
+    gasEstimate: number
+  }
+  risk: {
+    level: 'low' | 'medium' | 'high' | 'critical'
+    factors: {
+      valueRisk: number
+      functionRisk: number
+      contractRisk: number
+      gasRisk: number
+      overallScore: number
+      overallRisk: string
+      recommendations: string[]
+    }
+    score: number
+    recommendations: string[]
+  }
+  contract: {
+    name: string
+    reputation: number
+    verified: boolean
+    category: string
+  }
+  timestamp: string
+}
+
 class ApiService {
   private async request<T>(
     endpoint: string,
@@ -157,6 +193,21 @@ class ApiService {
     return this.request<string[]>(`/ai/suggestions/${walletAddress}?type=${type}`)
   }
 
+  // Security Analysis
+  async analyzeTransaction(txData: {
+    to: string
+    data: string
+    value: string
+    from?: string
+  }): Promise<ApiResponse<SecurityAnalysis>> {
+    console.log('🌐 API Service - Base URL:', API_BASE_URL)
+    console.log('📤 Sending transaction data:', txData)
+    return this.request<SecurityAnalysis>('/analysis/analyze', {
+      method: 'POST',
+      body: JSON.stringify(txData),
+    })
+  }
+
   // Health check
   async healthCheck(): Promise<ApiResponse<any>> {
     return this.request<any>('/health')
@@ -164,4 +215,4 @@ class ApiService {
 }
 
 export const apiService = new ApiService()
-export type { Transaction, TransactionStats, ChatMessage }
+export type { Transaction, TransactionStats, ChatMessage, SecurityAnalysis }

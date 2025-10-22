@@ -183,17 +183,17 @@ export class RiskAssessment {
     }
 
     // Function-specific recommendations
-    if (decoded.functionName === 'approve') {
+    if (decoded && decoded.functionName === 'approve') {
       recommendations.push('💡 Use limited approvals instead of unlimited amounts')
       recommendations.push('🔒 Revoke unused approvals regularly')
     }
 
-    if (decoded.functionName === 'addLiquidity') {
+    if (decoded && decoded.functionName === 'addLiquidity') {
       recommendations.push('📊 Understand impermanent loss before providing liquidity')
       recommendations.push('⏰ Monitor your position regularly')
     }
 
-    if (decoded.functionName.includes('swap')) {
+    if (decoded && decoded.functionName && decoded.functionName.includes('swap')) {
       recommendations.push('💱 Check slippage tolerance settings')
       recommendations.push('⏱️ Consider transaction timing during high volatility')
     }
