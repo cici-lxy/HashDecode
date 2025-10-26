@@ -55,7 +55,7 @@ function App() {
           <h1>HashDecode</h1>
         </div>
         <p>Translate. Transact. Transcend.</p>
-        <p className="subtitle">Paste any Ethereum hash, and get instant human-readable explanations.</p>
+        <p className="subtitle">Paste any Ethereum hash, and get instant readable explanations.</p>
       </header>
 
       <main className="app-main">
