@@ -62,4 +62,4 @@ MIT. Use it however you want.
 
 ---
 
-Built this because I got tired of manually figuring out what transactions do. If it saves you time, cool. If not, ¯\\_(ツ)_/¯
+Built this because I got tired of manually figuring out what transactions do. If it saves you time, cool. If not, whatever.
