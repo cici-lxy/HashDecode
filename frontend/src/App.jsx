@@ -50,8 +50,12 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>🔗 HashDecode</h1>
-        <p>Decode blockchain transactions into plain English. Paste any Ethereum hash, get instant human-readable explanations.</p>
+        <div className="logo-container">
+          <img src="/logo.PNG" alt="HashDecode Logo" className="logo" />
+          <h1>HashDecode</h1>
+        </div>
+        <p>Translate. Transact. Transcend.</p>
+        <p className="subtitle">Paste any Ethereum hash, and get instant human-readable explanations.</p>
       </header>
 
       <main className="app-main">

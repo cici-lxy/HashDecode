@@ -30,6 +30,21 @@ body {
   margin: 0 auto 2rem auto;
 }
 
+.logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.4));
+}
+
 .app-header h1 {
   font-size: 4.5rem;
   font-weight: 900;
@@ -38,14 +53,22 @@ body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-shadow: 0 0 30px rgba(168, 85, 247, 0.3);
-  margin: 0 0 1rem 0;
+  margin: 0;
 }
 
 .app-header p {
   font-size: 1.4rem;
   color: #cbd5e1;
   opacity: 0.9;
-  margin: 0;
+  margin: 0 0 1.2rem 0;
+}
+
+.app-header p:last-child {
+  margin-bottom: 0;
+}
+
+.app-header p.subtitle {
+  font-size: 1.1rem;
 }
 
 .hash-form {
