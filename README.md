@@ -1,126 +1,65 @@
-# HashDecode - Blockchain Transaction Translator
+# HashDecode
 
-A simple web app that turns confusing blockchain transaction hashes into plain English explanations. Built with React and Node.js, it uses the Blockscout API to fetch transaction data and OpenAI to generate human-readable descriptions.
+Ever stared at a transaction hash like `0x5e1657ef0e9be9bc72efefe59a2528d0d730d478cfc9e6cdd09af9f997bb3ef4` and had absolutely no idea what it does? Yeah, me too. That's why I built this.
 
-## What it does
+HashDecode takes those cryptic blockchain transaction hashes and explains them in plain English. Just paste a hash, hit translate, and you'll get a breakdown of what actually happened.
 
-Ever looked at a transaction hash like `0x5e1657ef0e9be9bc72efefe59a2528d0d730d478cfc9e6cdd09af9f997bb3ef4` and wondered what the hell it actually does? This app solves that problem.
+## How it works
 
-Just paste any Ethereum transaction hash, and it'll tell you exactly what happened - token swaps, DeFi operations, NFT transfers, whatever. No more staring at hex codes trying to figure out if someone just moved some tokens around or executed a complex arbitrage strategy.
+I scrape transaction data from Blockscout, throw it at ChatGPT, and it spits back something humans can actually understand. Token swaps, DeFi stuff, NFT transfers - it covers most things.
 
-## Getting started
+## Getting it running
 
-### Prerequisites
+You'll need Node.js and an OpenAI API key. Clone this repo, then:
 
-- Node.js (v16 or higher)
-- An OpenAI API key
-- Basic understanding of how blockchain transactions work
-
-### Installation
-
-1. Clone the repo:
 ```bash
-git clone <your-repo-url>
-cd hashtalk
-```
-
-2. Set up the backend:
-```bash
+# Backend
 cd backend
 npm install
 ```
 
-3. Create a `.env` file in the backend directory:
-```env
-OPENAI_API_KEY=your_openai_api_key_here
+Create a `.env` file in the backend folder:
+```
+OPENAI_API_KEY=your_key_here
 BLOCKSCOUT_API_URL=https://eth.blockscout.com/api/v2
 PORT=5000
 ```
 
-4. Set up the frontend:
+Then start everything:
 ```bash
+# In backend folder
+npm run dev
+
+# In frontend folder  
 cd ../frontend
 npm install
-```
-
-### Running the app
-
-Start both servers:
-
-**Backend:**
-```bash
-cd backend
 npm run dev
 ```
 
-**Frontend:**
-```bash
-cd frontend
-npm run dev
-```
+Open `http://localhost:5173` and you're good to go.
 
-Then open `http://localhost:5173` in your browser.
+## Try it out
 
-## How to use
+I've been testing with these hashes:
+- `0x5e1657ef0e9be9bc72efefe59a2528d0d730d478cfc9e6cdd09af9f997bb3ef4` - Some DeFi arbitrage nonsense
+- `0xd839280c7211bb765cf63099b86657d3011904bce81cec8091f4017a9d652513` - Uniswap swap
 
-1. Find a transaction hash (they all start with `0x` and are 64 characters long)
-2. Paste it into the input field
-3. Click "Translate Hash"
-4. Read the explanation
+The UI shows you the transaction details along with the AI explanation, plus all the technical stuff if you're into that.
 
-The app will show you:
-- What the transaction actually did
-- Which tokens were involved
-- How much was transferred
-- Which protocols were used
+## Tech stuff
 
-You can also expand the "Technical Details" section to see the raw blockchain data if you're into that sort of thing.
+Backend is Express with Blockscout API and OpenAI. Frontend is React with a dark theme because I hate bright screens. Works pretty well for the basic stuff I'm doing with it.
 
-## Example transactions to try
-
-Here are some real transaction hashes you can test with:
-
-- `0x5e1657ef0e9be9bc72efefe59a2528d0d730d478cfc9e6cdd09af9f997bb3ef4` - Complex DeFi arbitrage
-- `0xd839280c7211bb765cf63099b86657d3011904bce81cec8091f4017a9d652513` - Uniswap token swap
-
-## Technical details
-
-### Backend
-- Express.js server
-- Blockscout API integration for transaction data
-- OpenAI GPT-3.5-turbo for translations
-- Proper error handling and validation
-
-### Frontend
-- React with modern hooks
-- Glass-morphism UI design
-- Responsive layout
-- Real-time translation updates
-
-### API endpoints
-- `POST /translate` - Main translation endpoint
-- `GET /health` - Health check
-- `GET /` - Basic status
-
-## Cost considerations
-
-Each translation costs roughly $0.00075 (less than a penny). The app uses GPT-3.5-turbo which is pretty cheap for this use case. You can monitor your usage in the OpenAI dashboard.
+Each translation costs like a fraction of a penny, so it's cheap to run.
 
 ## Limitations
 
-- Only works with Ethereum mainnet transactions
-- Requires valid transaction hashes (64 hex characters)
-- Depends on Blockscout API availability
-- OpenAI API rate limits apply
-
-## Contributing
-
-Feel free to submit issues or pull requests. The codebase is pretty straightforward - backend handles the API calls and AI processing, frontend handles the UI.
+Only does Ethereum mainnet. Hashes have to be valid 64-character hex codes starting with `0x`. Obviously depends on Blockscout being up and your OpenAI API having credits.
 
 ## License
 
-MIT License - do whatever you want with it.
+MIT. Use it however you want.
 
 ---
 
-Built by someone who got tired of manually decoding blockchain transactions. If this saves you time, consider it a win.
+Built this because I got tired of manually figuring out what transactions do. If it saves you time, cool. If not, ¯\\_(ツ)_/¯
