@@ -1,65 +1,79 @@
 # HashDecode
 
-Ever stared at a transaction hash like `0x5e1657ef0e9be9bc72efefe59a2528d0d730d478cfc9e6cdd09af9f997bb3ef4` and had absolutely no idea what it does? Yeah, me too. That's why I built this.
+Turning blockchain transaction hashes into plain English explanations.
 
-HashDecode takes those cryptic blockchain transaction hashes and explains them in plain English. Just paste a hash, hit translate, and you'll get a breakdown of what actually happened.
+HashDecode takes those cryptic blockchain transaction hashes and explains what actually happened. Just paste a hash and get a clear breakdown of the transaction.
 
 ## How it works
 
-I scrape transaction data from Blockscout, throw it at ChatGPT, and it spits back something humans can actually understand. Token swaps, DeFi stuff, NFT transfers - it covers most things.
+The app fetches transaction data from Blockscout and uses OpenAI to generate human-readable explanations. It handles token swaps, DeFi operations, NFT transfers, and most Ethereum transactions.
 
-## Getting it running
+## Setup
 
-You'll need Node.js and an OpenAI API key. Clone this repo, then:
+You'll need Node.js installed and an OpenAI API key.
 
+1. Clone the repository:
 ```bash
-# Backend
+git clone <your-repo-url>
+cd hashtalk
+```
+
+2. Install backend dependencies:
+```bash
 cd backend
 npm install
 ```
 
-Create a `.env` file in the backend folder:
+3. Create a `.env` file in the backend folder:
 ```
 OPENAI_API_KEY=your_key_here
 BLOCKSCOUT_API_URL=https://eth.blockscout.com/api/v2
 PORT=5000
 ```
 
-Then start everything:
+4. Install frontend dependencies:
 ```bash
-# In backend folder
-npm run dev
-
-# In frontend folder  
 cd ../frontend
 npm install
+```
+
+## Running the app
+
+Start the backend:
+```bash
+cd backend
 npm run dev
 ```
 
-Open `http://localhost:5173` and you're good to go.
+Start the frontend in another terminal:
+```bash
+cd frontend
+npm run dev
+```
 
-## Try it out
+Open `http://localhost:5173` in your browser.
 
-I've been testing with these hashes:
-- `0x5e1657ef0e9be9bc72efefe59a2528d0d730d478cfc9e6cdd09af9f997bb3ef4` - Some DeFi arbitrage nonsense
+## Testing
+
+Here are some example transaction hashes to try:
+- `0x5e1657ef0e9be9bc72efefe59a2528d0d730d478cfc9e6cdd09af9f997bb3ef4` - DeFi arbitrage
 - `0xd839280c7211bb765cf63099b86657d3011904bce81cec8091f4017a9d652513` - Uniswap swap
 
-The UI shows you the transaction details along with the AI explanation, plus all the technical stuff if you're into that.
+The app displays transaction details, an AI-generated explanation, and technical information.
 
-## Tech stuff
+## Technology
 
-Backend is Express with Blockscout API and OpenAI. Frontend is React with a dark theme because I hate bright screens. Works pretty well for the basic stuff I'm doing with it.
+Backend uses Express.js with Blockscout API integration and OpenAI for translations. Frontend is built with React featuring a dark theme design.
 
-Each translation costs like a fraction of a penny, so it's cheap to run.
+Each translation costs approximately $0.00075, making it economical to use.
 
 ## Limitations
 
-Only does Ethereum mainnet. Hashes have to be valid 64-character hex codes starting with `0x`. Obviously depends on Blockscout being up and your OpenAI API having credits.
+- Only supports Ethereum mainnet transactions
+- Requires valid 64-character hexadecimal hashes starting with `0x`
+- Depends on Blockscout API availability
+- Subject to OpenAI API rate limits
 
 ## License
 
-MIT. Use it however you want.
-
----
-
-Built this because I got tired of manually figuring out what transactions do. If it saves you time, cool. If not, whatever.
+MIT License - feel free to use it as you like.
